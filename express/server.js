@@ -5,9 +5,9 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const axios = require('axios');
+require('dotenv').config();
 
-let url =
-  'https://spreadsheets.google.com/feeds/list/1J3qw1ONH-Om2qfjSemzeAdLutZmuC_D1LRynm_f35Vs/od6/public/basic?alt=json';
+let url = process.env.SHEET_URL;
 
 app.use(cors());
 
