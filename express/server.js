@@ -4,10 +4,23 @@ const serverless = require('serverless-http');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const axios = require('axios');
+const GoogleSpreadsheet = require('google-spreadsheet');
+const { promisify } = require('util');
 require('dotenv').config();
 
-let url = process.env.SHEET_URL;
+const creds = require('../client_secret.json');
+
+async function accessSpreadsheet(callback) {
+  const doc = new GoogleSpreadsheet(
+    '1J3qw1ONH-Om2qfjSemzeAdLutZmuC_D1LRynm_f35Vs'
+  );
+  await promisify(doc.useServiceAccountAuth)(creds);
+  const info = await promisify(doc.getInfo)();
+  const sheet = info.worksheets[0];
+
+  const rows = await promisify(sheet.getRows)();
+  callback(rows);
+}
 
 app.use(cors());
 
@@ -21,30 +34,9 @@ router.get('/another', (req, res) => res.json({ route: req.originalUrl }));
 router.post('/', (req, res) => res.json({ postBody: req.body }));
 
 router.get('/list-service', (req, res) => {
-  axios
-    .get(url)
-    .then(response => {
-      let sheets = response.data.feed.entry;
-      if (sheets.length) {
-        let arr = [];
-        sheets.forEach(data => {
-          let obj = {};
-          obj.data = data.content.$t.split(', column').forEach((d, idx) => {
-            let temp = d.split(': ');
-            if (idx == 0) {
-              obj[temp[0].split('column')[1]] = temp[1];
-            } else {
-              obj[temp[0]] = temp[1];
-            }
-          });
-          arr.push(obj);
-        });
-        res.json(arr);
-      }
-    })
-    .catch(err => {
-      res.send(err);
-    });
+  accessSpreadsheet(function(hai) {
+    res.send(hai);
+  });
 });
 
 app.use(bodyParser.json());
