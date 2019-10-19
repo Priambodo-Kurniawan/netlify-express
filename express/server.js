@@ -45,7 +45,7 @@ router.post('/', (req, res) => res.json({ postBody: req.body }));
 router.post('/submit-email', [check('email').isEmail()], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+    return res.status(422).send({ errors: errors.array() });
   }
 
   // Create a document object using the ID of the spreadsheet - obtained from its URL.
