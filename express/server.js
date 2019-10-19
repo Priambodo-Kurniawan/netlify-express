@@ -62,7 +62,9 @@ router.post('/submit-email', [check('email').isEmail()], (req, res) => {
       err
     ) {
       if (err) {
-        console.log(err);
+        res.send({
+          error: err
+        });
       } else {
         res.send({
           status: 200,
